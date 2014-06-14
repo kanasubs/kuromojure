@@ -19,7 +19,7 @@ I'll be happy to add your project using kuromojure to this list.
 
 ### License
 
-Copyright (C) 2013 Carlos C. Fontes.
+Copyright (C) 2014 Carlos C. Fontes.
 
 Double licensed under the [Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html) (the same as Clojure) or
 the [Apache Public License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
