@@ -1,49 +1,65 @@
-kuromojure
+kuromojure [![Build Status](https://travis-ci.org/ccfontes/kuromojure.png?branch=master)](https://travis-ci.org/ccfontes/kuromojure)
 ==========
-Kuromojure is a Clojure wrapper for [kuromoji](https://github.com/atilika/kuromoji).
+Kuromojure is a practical and concise Clojure wrapper around
+[kuromoji version 0.7.7](https://github.com/atilika/kuromoji), a Japanese Morphological
+Analyser designed for search.
 
-Install
--------
-[![clojars version](https://clojars.org/kuromojure/latest-version.svg?raw=true)](https://clojars.org/kuromojure)
+<b>Warning</b>: Kuromojure is very unstable. The API will probably change some times in
+the near future, so visit this page often to get the updates.
 
-Usage
+### Installing
 -------
-Tokenizer modes are `:normal`, `:search` or `:extended`. Omitting mode defaults to `:normal`.
+[![clojars version](https://clojars.org/kuromojure/latest-version.svg?raw=true)]
+(https://clojars.org/kuromojure)
+
+### Crafting
+-------
+Tokenizer modes are `:normal`, `:search` or `:extended`. Omitting mode defaults
+to `:normal`.
 ```clj
 user=> (use 'kuromojure)
 user=> (with-tokenizer :search
-         (-> "何を言ってるんだ" tokenize first))
-;;=> {:base-form "何"
-;     :position 0
+         (-> "日本" tokenize first))
+;;=> {:surface "日本"
 ;     :known true
-;     :class org.atilika.kuromoji.Token
-;     :reading "ナニ"
-;     :part-of-speech "名詞,代名詞,一般,*"
-;     :surface-form "何"
-;     :all-features "名詞,代名詞,一般,*,*,*,何,ナニ,ナニ"
-;     :user false
-;     :unknown false
-;     :all-features-array ("名詞" "代名詞" "一般" "*" "*" "*" "何" "ナニ" "ナニ")}
+;     :reading "ニッポン"
+;     :features ("名詞" "固有名詞" "地域" "国" "*" "*" "日本" "ニッポン" "ニッポン")
+;     :base "日本"
+;     :classes ["名詞" "固有名詞" "地域" "国"]}
 ```
 
-Missing something?
+### Translation to Japanese
 -------
-Feature and pull requests are welcome!
+README.md and API translation (`defcopy`), anyone can do it please? It
+can stay side by side with the English version, or even something more kakkoii!
 
-Using kuromojure?
+### Missing something or you just don't agree? You have several options, and all are world changing
 -------
-I'll be happy to add your project using kuromojure to this list.
+Criticize my decisions.
 
-[kanasubs.com](http://www.kanasubs.com) — Convert raw subtitles in Kanji to Kana online.
+Ask me to implement something nice.
 
-Contributions
+Doing it yourself is amazing.
+
+Fork it and be creative.
+
+### Using kuromojure in Ramen or Disruptive projects?
 -------
-- [Kuromoji example in Clojure](https://github.com/bouzuya/clj-kuromoji-example) by [bouzuya](https://github.com/bouzuya)
-- The remainder by [Carlos Cunha](https://github.com/ccfontes)
+I'll be happy to add it to this list.
 
-License
+[kanasubs.com](http://www.kanasubs.com) — Convert raw subtitles in Kanji to
+Kana online.
+
+### Gentle contributions
+-------
+- [Kuromoji example in Clojure](https://github.com/bouzuya/clj-kuromoji-example)
+by [bouzuya](https://github.com/bouzuya)
+
+### License
 -------
 Copyright (C) 2014 Carlos C. Fontes.
 
-Double licensed under the [Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html) (the same as Clojure) or
-the [Apache Public License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+Double licensed under the
+[Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html) (the same
+as Clojure) or the
+[Apache Public License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
