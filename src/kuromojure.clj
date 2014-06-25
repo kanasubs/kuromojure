@@ -18,20 +18,61 @@
     (binding [*tokenizer* (-> (Tokenizer/builder) (.mode mode#) .build)]
       ~mode ~@body)))
 
-(defn- clojurify-token
-  "Accepts a org.atilika.kuromoji.Token and then hash maps, removes,
-   renames and transforms its properties according to a Clojurian perspective."
+(defonce jp->en-mapping
+  {"名詞"    "noun"
+   "固有名詞" "proper-noun"
+   "地域"    "region"
+   "国"      "state"
+   "一般"    "common"
+   "助詞"    "particle"
+   "助動詞"  "aux-verb"
+   "特殊"    "special"
+   "基本形"  "basic-form"
+   "記号"    "symbol"
+   "句点"    "full-stop"})
+
+(defn jp->en
+  "Converts word in Japanese to English. Defaults to English in case it's not
+   mapped yet."
+  [word] (or-> word jp->en-mapping))
+
+(defn ->clj-token
+  "Accepts a org.atilika.kuromoji.Token and creates a Clojure map with the
+   token attributes."
   [token]
   (-> token
-  	  bean
-  	  (rename-keys {:baseForm :base
+      bean
+      (update-multi {:allFeaturesArray seq :partOfSpeech #(split % #",")})))
+
+(defn ->en-token
+  "Accepts a base-clj token and translates its features to english."
+  [token]
+  (update-each token [:partOfSpeech :allFeaturesArray] (partial map jp->en)))
+
+(defn ->kuromojure-token
+  "Accepts a org.atilika.kuromoji.Token and then transforms its nature
+   according to my opiniated perspective of what makes good Clojurian data."
+  [token]
+  (-> token
+      ->clj-token
+      ->en-token
+      (rename-keys {:baseForm :base
                     :partOfSpeech :classes
                     :surfaceForm :surface
                     :allFeaturesArray :features})
-  	  (dissoc :class :unknown :user :allFeatures :position)
-  	  (update-multi {:features seq :classes #(split % #",")})))
+      (dissoc :class :unknown :user :allFeatures :position)))
+
+(defn raw-tokenize
+  "Segments text into an ordered seq of org.atilika.kuromoji.Token tokens.
+   Must be used in the context of with-tokenizer."
+  [s] (seq (.tokenize *tokenizer* s)))
+
+(defn clj-tokenize
+  "Segments text into an ordered seq of clj tokens.
+   Must be used in the context of with-tokenizer."
+  [s] (map ->clj-token (raw-tokenize s)))
 
 (defn tokenize
-  "Segments text into an ordered seq of clojurified token maps.
+  "Segments text into an ordered seq of kuromojure tokens.
    Must be used in the context of with-tokenizer."
-  [s] (->> (.tokenize *tokenizer* s) seq (map clojurify-token)))
+  [s] (map ->kuromojure-token (raw-tokenize s)))

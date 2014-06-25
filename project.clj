@@ -1,7 +1,4 @@
-(defproject kuromojure "0.4.0"
-  
-  :source-paths ["src"]
-  :test-paths ["test"]
+(defproject kuromojure "0.5.0"
 
   :url "https://github.com/ccfontes/kuromojure"
 
@@ -13,9 +10,7 @@
 
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.atilika.kuromoji/kuromoji "0.7.7"]
-                 [benrikuro "0.2.3"]]
-
-  
+                 [benrikuro "0.2.4"]]
 
   :profiles {:dev {:plugins [[lein-midje "3.1.3"]]
                    :dependencies [[midje "1.6.3"]]}}
