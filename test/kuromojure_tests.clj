@@ -25,10 +25,13 @@
     (->> "ディジカメを買った" tokenize (map :surface)) => ["デ" "ィ" "ジ" "カ" "メ" "を" "買っ" "た"]))
 
 (fact "Implicit mode defaults to :normal. Map properties are delicious."
-  (with-tokenizer (->> "日本" tokenize first))
+  (with-tokenizer (-> "日本" tokenize first))
     => {:surface "日本"
         :known true
         :reading "ニッポン"
-        :features ["noun" "proper-noun" "region" "state" "*" "*" "日本" "ニッポン" "ニッポン"]
-        :base "日本"
-        :classes ["noun" "proper-noun" "region" "state"]})
+        :features [:noun :proper :place :country nil nil "日本" "ニッポン" "ニッポン"]
+        :base-form "日本"
+        :part-of-speech [:noun :proper :place :country]})
+
+(fact
+  (->exceptions ["形容詞" "非自立"]) => ["形容詞,非自立"])

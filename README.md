@@ -1,7 +1,9 @@
 kuromojure [![Build Status](https://travis-ci.org/ccfontes/kuromojure.png?branch=master)](https://travis-ci.org/ccfontes/kuromojure)
 ==========
-Kuromojure is a general, practical and concise Clojure wrapper around
-[kuromoji](https://github.com/atilika/kuromoji) (version 0.7.7), a Japanese
+A Clojure Japanese Morphological Analyser specialized for search.
+
+Kuromojure is a general purpose, practical and concise Clojure wrapper around
+[Kuromoji](https://github.com/atilika/kuromoji) (version 0.7.7), a Japanese
 Morphological Analyser designed for search.
 
 <b>Warning</b>: kuromojure is very unstable. The API will probably change some
@@ -15,8 +17,8 @@ Add the following to the `:dependencies` vector of your `project.clj` file:
 
 ### Crafting
 -------
-Tokenizer modes are `:normal`, `:search` and `:extended`. Omitting mode
-defaults to `:normal`.
+Tokenizer modes are `:normal`, `:search` and `:extended`. Omitting
+mode defaults to `:normal`.
 ```clj
 user=> (use 'kuromojure)
 user=> (with-tokenizer :search
@@ -24,15 +26,21 @@ user=> (with-tokenizer :search
 ;;=> {:surface "日本"
 ;     :known true
 ;     :reading "ニッポン"
-;     :features ("noun" "proper-noun" "region" "state" "*" "*" "日本" "ニッポン" "ニッポン")
-;     :base "日本"
-;     :classes ("noun" "proper-noun" "region" "state")}
+;     :features [:noun :proper :place :country nil nil "日本" "ニッポン" "ニッポン"]
+;     :base-form "日本"
+;     :part-of-speech [:noun :proper :place :country]}
 ```
+For more examples, read the [tests](https://github.com/ccfontes/kuromojure/blob/master/test/kuromojure_tests.clj).
+
 ### Goals
 -------
-Kuromojure is already useful for end user applications, but aims further to
-become the starting point of kuromoji in Clojure for repurposing it to meet
+Kuromojure is already useful for end user applications. It aims further to
+become the starting point of Kuromoji in Clojure by repurposing it to meet
 other ends.
+
+### Wishlist
+-------
+- Upgrade Kuromoji to version 0.80 (will make it for release 0.8.0 haha)
 
 ### Translating to Japanese
 I think the best idea would be to use this project as a dependency of a
@@ -44,7 +52,7 @@ API.
 ### Repurposing the library
 The intermediate fns logic for translation applies here too.
 
-### Missing something or you just don't agree? You have several options
+### Missing something or you just don't agree?
 -------
 Please criticize my decisions.
 
@@ -63,6 +71,8 @@ Kana online.
 
 ### Gentle contributions
 -------
+- [Christian Moen](https://github.com/cmoen) continuously provided unvaluable
+information, including the Part of Speech translations to English
 - [Kuromoji example in Clojure](https://github.com/bouzuya/clj-kuromoji-example)
 by [bouzuya](https://github.com/bouzuya)
 

@@ -1,4 +1,4 @@
-(defproject kuromojure "0.5.0"
+(defproject kuromojure "0.6.0"
 
   :url "https://github.com/ccfontes/kuromojure"
 
@@ -12,7 +12,10 @@
                  [org.atilika.kuromoji/kuromoji "0.7.7"]
                  [benrikuro "0.2.4"]]
 
-  :profiles {:dev {:plugins [[lein-midje "3.1.3"]]
+  :profiles {:dev {:plugins [[lein-midje "3.1.3"] [codox "0.8.9"]]
                    :dependencies [[midje "1.6.3"]]}}
 
-  :repl-options {:init-ns kuromojure})
+  :repl-options {:init-ns kuromojure}
+
+  :codox {:src-dir-uri "https://github.com/ccfontes/kuromojure/blob/master/"
+          :src-linenum-anchor-prefix "L"})
