@@ -1,5 +1,5 @@
 kuromojure [![Build Status](https://travis-ci.org/ccfontes/kuromojure.png?branch=master)](https://travis-ci.org/ccfontes/kuromojure)
-==========
+=======
 A Clojure Japanese Morphological Analyser specialized for search.
 
 Kuromojure is a general purpose, practical and concise Clojure wrapper around
@@ -11,7 +11,7 @@ times in the near future, so visit this page often to get the updates.
 
 ### Installing
 -------
-Add the following to the `:dependencies` vector of your `project.clj` file:
+Add the following entry to the `:dependencies` vector of your `project.clj` file:
 [![clojars version](https://clojars.org/kuromojure/latest-version.svg?raw=true)]
 (https://clojars.org/kuromojure)
 
@@ -43,6 +43,7 @@ other ends.
 - Upgrade Kuromoji to version 0.80 (will make it for release 0.8.0 haha)
 
 ### Translating to Japanese
+-------
 I think the best idea would be to use this project as a dependency of a
 separate project and make the translation there. For that purpose, I provided
 intermediate `token` and `tokenize` transform fns. Please take a look at the
@@ -50,7 +51,25 @@ source. If you have a different idea, please drop me a line and I'll adjust the
 API.
 
 ### Repurposing the library
+-------
 The intermediate fns logic for translation applies here too.
+Use `clj-tokenize` to tokenize the text into `clj-token's and from there do the
+transformations you would like to the tokens:
+```clj
+(with-tokenizer
+    (-> "日本" clj-tokenize first)) =>
+;     {:surfaceForm "日本"
+;      :known true
+;      :reading "ニッポン"
+;      :allFeatures "名詞,固有名詞,地域,国,*,*,日本,ニッポン,ニッポン"
+;      :baseForm "日本"
+;      :partOfSpeech "名詞,固有名詞,地域,国"
+;      :position 0
+;      :allFeaturesArray ["名詞" "固有名詞" "地域" "国" "*" "*" "日本" "ニッポン" "ニッポン"]
+;      :class org.atilika.kuromoji.Token
+;      :user false
+;      :unknown false}
+```
 
 ### Missing something or you just don't agree?
 -------
@@ -72,7 +91,7 @@ Kana online.
 ### Gentle contributions
 -------
 - [Christian Moen](https://github.com/cmoen) continuously provided unvaluable
-information, including the Part of Speech translations to English
+information, including the Part of Speech translations to English from Lucene.
 - [Kuromoji example in Clojure](https://github.com/bouzuya/clj-kuromoji-example)
 by [bouzuya](https://github.com/bouzuya)
 
