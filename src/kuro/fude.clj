@@ -81,9 +81,8 @@
 
 (defmethod elect-by :surface-and-part-of-speech
   [_ n token tokens]
-  (let [take-n #(take n %)]
-  	(->> (filter-by-some-part-of-speech n token tokens)
-  		   (filter-by-surface token))))
+  (->> (filter-by-some-part-of-speech n token tokens)
+  		 (filter-by-surface token)))
 
 (defmethod elect-by :part-of-speech [_ n token tokens]
   (filter-by-some-part-of-speech n token tokens))
