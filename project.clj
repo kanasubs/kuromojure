@@ -7,8 +7,9 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-;  :repositories
-;    [["kuromoji" "http://www.atilika.org/nexus/content/repositories/atilika"]]
+
+  :repositories
+    [["kuromoji" "http://www.atilika.org/nexus/content/repositories/atilika"]]
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/core.match "0.2.1"]
