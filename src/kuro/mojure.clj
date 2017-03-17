@@ -74,9 +74,7 @@
   "Accepts a org.atilika.kuromoji.Token and creates a Clojure map with the
    token attributes."
   [token]
-  (-> token
-      bean
-      (update :allFeaturesArray seq)))
+  (-> token bean (update :allFeaturesArray seq)))
 
 (defn ->exceptions
   "Accepts a clj-token and compounds the exceptions."
@@ -121,27 +119,9 @@
 (defn- clj-tokenize-helper
   [s] (->> (raw-tokenize s) (map moji->clj-token)))
 
-(defn ^String trim-unicode
-  "Removes whitespace from both ends of string."
-  {:added "1.2"}
-  [^CharSequence s]
-  (let [len (.length s)]
-    (loop [rindex len]
-      (if (zero? rindex)
-        ""
-        (if (or (Character/isWhitespace (.charAt s (dec rindex)))
-                (= "　" (.charAt s (dec rindex))))
-          (recur (dec rindex))
-          ;; there is at least one non-whitespace char in the string,
-          ;; so no need to check for lindex reaching len.
-          (loop [lindex 0]
-            (if (Character/isWhitespace (.charAt s lindex))
-              (recur (inc lindex))
-              (.. s (subSequence lindex rindex) toString))))))))
-
 (defn clj-tokenize-with-spaces [text]
-  (let [text-without-spaces (str/replace text #"[　 ]+" "")
-        tokens (clj-tokenize-helper text-without-spaces)
+  (let [txt-no-spaces (str/replace text #"[　 ]+" "")
+        tokens (clj-tokenize-helper txt-no-spaces)
         replace-fn (fn [s token-s]
                      (str/replace s (re-pattern (str "^" token-s)) ""))
         some-space-next #(some #{(-> % first str)} [" " "　"])
@@ -152,26 +132,25 @@
                     next-space (next-space-fn replaced-text)]
                 [(if next-space (rm-leading-space replaced-text) replaced-text)
                  (conj coll (merge token next-space))]))]
-            (second (reduce f [text []] tokens))))
+    (second (reduce f [text []] tokens))))
 
 (defn ->model
   [text & [token-fn]]
   (->> (clj-tokenize-with-spaces text)
-       (map #(select-keys % [:surfaceForm :partOfSpeech :next-space]))
-       (map #(merge (select-keys % [:next-space])
-                    ((or token-fn identity) %)))
-       (map #(into {} (remove (fn [[k v]] ((every-pred coll? empty?) v)) %)))
-       (#(map (fn [item1 item2] [item1 item2]) % (rest %)))
-       (map (partial apply hash-map))
-       (apply merge-with (comp flatten list))
-       (map-vals (comp frequencies flatten list))))
+    (map #(select-keys % [:surfaceForm :partOfSpeech :next-space]))
+    (map #(merge (select-keys % [:next-space])
+                 ((or token-fn identity) %)))
+    (map #(into {} (remove (fn [[k v]] ((every-pred coll? empty?) v)) %)))
+    (#(map (fn [item1 item2] [item1 item2]) % (rest %)))
+    (map (partial apply hash-map))
+    (apply merge-with (comp flatten list))
+    (map-vals (comp frequencies flatten list))))
 
 (defonce spaces (with-tokenizer (clj-tokenize-helper " 　"))) ; OPTIMIZE make this atom
 (defonce half-space (first spaces))
 (defonce full-space (second spaces))
 
-(def model
-  (with-tokenizer :learning (->model training-data)))
+(def model (with-tokenizer :search (->model training-data)))
 
 (defn max-key-next-tokens [next-tokens-with-frequency]
   (try
@@ -180,31 +159,31 @@
     (println "exception occurred")
     (throw (Exception. "bla")))))
 
-(defn most-frequent-adjacent-pairs [tokens]
-    (apply max-key (comp last last) tokens))
+; [pt1^{nt1^2 nt2^1} pt2^{nt1^4 nt2^1}]
+(defn ->most-frequent-adjacent-pair [tokens]
+  (apply max-key (comp last last) tokens))
 
 (defmulti add-space-info
   (fn [{:keys [surfaceForm]} _]
     (boolean (some #{surfaceForm} ["　" " " "\f"]))))
 
-(defmethod add-space-info true [prev-token _]
-  prev-token)
+(defmethod add-space-info true [prev-token _] prev-token)
 
 (defmethod add-space-info :default [prev-token next-token]
-  (let [prev-token-candidates (find-token-candidates prev-token (keys model))
-        prev-token-candidates-without-elect
-          (mapv #(dissoc % :elect) prev-token-candidates)]
+  (let [prev-tok-candidates (find-token-candidates prev-token (keys model))
+        prev-tok-candidates-no-elect (mapv #(dissoc % :elect) prev-tok-candidates)]
     (try
       (or
-        (some->> (select-keys model prev-token-candidates-without-elect)
-                 (->narrowed-model-for-nexts next-token)
-                 (map (fn [[k v]] [k (max-key-next-tokens v)])) ; gets most frequent next for its prev
-                 most-frequent-adjacent-pairs
-                 first
-                 ; FIXME all prev-token are same level, so any will do
-                 (#(ffilter (fn [t] (= (dissoc t :elect) %)) prev-token-candidates))
-                 (<- (select-keys [:elect :next-space])
-                     (merge prev-token)))
+        (some->> (select-keys model prev-tok-candidates-no-elect)
+          (->narrowed-model-for-nexts next-token)
+          (map (fn [[k v]] [k (max-key-next-tokens v)])) ; gets most frequent next for its prev
+          ->most-frequent-adjacent-pair ; ([pt1 [nt1 1]] ..) → [pt1 [nt1 1]]
+          first ; [pt1 [nt1 1]] → pt1
+          ; FIXME all prev-tok-candidates are same level, so any will do
+; TO REMOVE IN SOME DAYS    (#(ffilter (fn [pt] (= (dissoc pt :elect) %))
+;                     prev-tok-candidates))
+          (<- (select-keys [:elect :next-space])
+              (merge prev-token)))
         prev-token)
     (catch Exception e  ; FIXME this is not correct
       (assoc prev-token :exception e)))))
