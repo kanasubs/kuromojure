@@ -2,6 +2,8 @@
 
   :url "https://github.com/ccfontes/kuromojure"
 
+  :description "Clojure wrapper for kuromoji"
+
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
