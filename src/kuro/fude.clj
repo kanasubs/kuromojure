@@ -91,27 +91,26 @@
 (defmethod elect-by :surface [_ token tokens]
   (filter-by-surface token tokens))
 
-(defn find-token-candidates
-  [token the-model]
+(defn find-token-candidates [token the-model]
   "Accepts token and model returning a list of token candidates."
   (or (some->> (elect-by :surface-and-part-of-speech 4 token the-model)
-               (map #(assoc % :elect 1)))
+        (map #(assoc % :elect 1)))
       (some->> (elect-by :surface-and-part-of-speech 3 token the-model)
-               (map #(assoc % :elect 2)))
+        (map #(assoc % :elect 2)))
       (some->> (elect-by :surface-and-part-of-speech 2 token the-model)
-               (map #(assoc % :elect 3)))
+        (map #(assoc % :elect 3)))
       (some->> (elect-by :part-of-speech 4 token the-model)
-               (map #(assoc % :elect 4)))
+        (map #(assoc % :elect 4)))
       (some->> (elect-by :part-of-speech 3 token the-model)
-               (map #(assoc % :elect 5)))
+        (map #(assoc % :elect 5)))
       (some->> (elect-by :surface-and-part-of-speech 1 token the-model)
-               (map #(assoc % :elect 6)))
+        (map #(assoc % :elect 6)))
       (some->> (elect-by :part-of-speech 2 token the-model)
-               (map #(assoc % :elect 7)))
+        (map #(assoc % :elect 7)))
       (some->> (elect-by :part-of-speech 1 token the-model)
-               (map #(assoc % :elect 8)))
+        (map #(assoc % :elect 8)))
       (some->> (elect-by :surface token the-model)
-               (map #(assoc % :elect 9)))))
+        (map #(assoc % :elect 9)))))
 
 (defn ->narrowed-model-entry-for-nexts
   [next-token [model-prev-token model-next-token-map]]
@@ -122,14 +121,15 @@
           (filter #(some #{(first %)} next-token-candidates-no-elect)
                   model-next-token-map)]
     (some->> next-token-model-candidates
-             seq
-             (vector model-prev-token)
-             (vector (-> next-token-candidates first :elect)))))
+      seq
+      (vector model-prev-token)
+      (vector (-> next-token-candidates first :elect)))))
 
 (defn ->narrowed-model-for-nexts [next-token model]
   (->> (keep (partial ->narrowed-model-entry-for-nexts next-token) model)
-       (sort-by first) ;=> [ [1 [..]] [1 [..]] [3 [..]] ]]
-       (partition-by (comp identity first)) ;=> [ [[1 [..]] [1 [..]]] [[3 [..]]] ]
-       first ;=> [[1 [..]] [1 [..]]]
-       (map second)
-       seq)) ;=> [[..] [..]]
+    (sort-by first) ;=> [ [1 [..]] [1 [..]] [3 [..]] ]]
+    (partition-by (comp identity first)) ;=> [ [[1 [..]] [1 [..]]] [[3 [..]]] ]
+    first ;=> [[1 [..]] [1 [..]]]
+    (map second)
+    seq)) ;=> [[..] [..]]
+
