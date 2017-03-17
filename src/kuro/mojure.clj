@@ -1,6 +1,5 @@
 (ns kuro.mojure
   (:use kuro.fude benri.kuro)
-  (:refer-clojure :exclude [update]) ; OPTIMIZE remove after upgrade to clj 1.7
   (:require [clojure.string :as str]
             [clojure.set :refer [rename-keys]]
             [clojure.core.memoize :refer [memo]]

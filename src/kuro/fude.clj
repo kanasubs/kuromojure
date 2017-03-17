@@ -1,6 +1,5 @@
 (ns kuro.fude
   (:use benri.kuro)
-  (:refer-clojure :exclude [update]) ; OPTIMIZE remove after upgrade to clj 1.7
   (:require [clojure.string :as str]
             [clojure.core.match :refer [match]]))
 ; (->> (with-tokenizer :learning (clj-tokenize "こんなダルい世界は　もう飽きた")) (map :surfaceForm))
