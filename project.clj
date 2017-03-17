@@ -7,6 +7,8 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
+  :scm {:name "git"
+        :url "https://github.com/ccfontes/kuromojure"}
 
   :repositories
     [["kuromoji" "http://www.atilika.org/nexus/content/repositories/atilika"]]
