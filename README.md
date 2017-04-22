@@ -12,8 +12,7 @@ times in the near future, so visit this page often to get the updates.
 ### Installing
 -------
 Add the following entry to the `:dependencies` vector of your `project.clj` file:
-[![clojars version](https://clojars.org/kuromojure/latest-version.svg?raw=true)]
-(https://clojars.org/kuromojure)
+[![clojars version](https://clojars.org/kuromojure/latest-version.svg?raw=true)](https://clojars.org/kuromojure)
 
 ### Crafting
 -------
@@ -30,7 +29,6 @@ user=> (with-tokenizer :search
 ;     :base-form "日本"
 ;     :part-of-speech [:noun :proper :place :country]}
 ```
-For more examples, read the [tests](https://github.com/ccfontes/kuromojure/blob/master/test/kuromojure_tests.clj).
 
 ### Wishlist
 -------
