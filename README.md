@@ -1,6 +1,6 @@
 kuromojure [![Build Status](https://travis-ci.org/ccfontes/kuromojure.png?branch=master)](https://travis-ci.org/ccfontes/kuromojure)
 =======
-A Clojure Japanese Morphological Analyser specialized for search.
+A Clojure Japanese Morphological Analyser specialized for search and learning.
 
 Kuromojure is a general purpose, practical and concise Clojure wrapper around
 [Kuromoji](https://github.com/atilika/kuromoji) (version 0.7.7), a Japanese
@@ -32,23 +32,9 @@ user=> (with-tokenizer :search
 ```
 For more examples, read the [tests](https://github.com/ccfontes/kuromojure/blob/master/test/kuromojure_tests.clj).
 
-### Goals
--------
-Kuromojure is already useful for end user applications. It aims further to
-become the starting point of Kuromoji in Clojure by repurposing it to meet
-other ends.
-
 ### Wishlist
 -------
-- Upgrade Kuromoji to version 0.80 (will make it for release 0.8.0 haha)
-
-### Translating to Japanese
--------
-I think the best idea would be to use this project as a dependency of a
-separate project and make the translation there. For that purpose, I provided
-intermediate `token` and `tokenize` transform fns. Please take a look at the
-source. If you have a different idea, please drop me a line and I'll adjust the
-API.
+- Upgrade Kuromoji to version 0.8.0 (will release Kuromojure 0.8.0 then)
 
 ### Repurposing the library
 -------
@@ -71,24 +57,7 @@ transformations you would like to the tokens:
 ;      :unknown false}
 ```
 
-### Missing something or you just don't agree?
--------
-Please criticize my decisions.
-
-Ask me to implement something nice.
-
-Doing it yourself is amazing.
-
-Fork it and be creative :)
-
-### Using kuromojure in Ramen or Disruptive projects?
--------
-I'll be happy to add it to this list.
-
-[kanasubs.com](http://www.kanasubs.com) — Convert raw subtitles in Kanji to
-Kana online.
-
-### Gentle contributions
+### Contributions
 -------
 - [Christian Moen](https://github.com/cmoen) continuously provided unvaluable
 information, including the Part of Speech translations to English from Lucene.
@@ -97,7 +66,7 @@ by [bouzuya](https://github.com/bouzuya)
 
 ### License
 -------
-Copyright (C) 2014 Carlos C. Fontes.
+Copyright (C) 2017 Carlos C. Fontes.
 
 Double licensed under the
 [Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html) (the same
