@@ -106,9 +106,8 @@
         tokens-with-debug
           (binding [*debug* true]
             (with-tokenizer :learning (clj-tokenize sentence)))]
-    (->> tokens (map :surfaceForm)) => ["日本" " " "に" "　" "行き" "ます" "。"]
-    (->> tokens-with-debug (map :surfaceForm))
-      => ["日本" " " 1 "に" "　" 1 "行き" 1 "ます" 1 "。"]))
+    (map :surfaceForm tokens) => ["日本" " " "に" "　" "行き" "ます" "。"]
+    (map :surfaceForm tokens-with-debug) => ["日本" " " 1 "に" "　" 1 "行き" 1 "ます" 1 "。"]))
 
 (fact
   (->> (with-tokenizer :learning (tokenize "日本に行きます。")) (map :surface))
