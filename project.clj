@@ -1,4 +1,4 @@
-(defproject ccfontes/kuromojure "0.6.2"
+(defproject kuromojure "0.6.3"
 
   :url "https://github.com/ccfontes/kuromojure"
 
