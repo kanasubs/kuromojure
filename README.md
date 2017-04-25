@@ -1,7 +1,5 @@
 kuromojure [![Build Status](https://travis-ci.org/ccfontes/kuromojure.png?branch=master)](https://travis-ci.org/ccfontes/kuromojure)
 =======
-A Clojure Japanese Morphological Analyser specialized for search and learning.
-
 Kuromojure is a general purpose, practical and concise Clojure wrapper around
 [Kuromoji](https://github.com/atilika/kuromoji) (version 0.7.7), a Japanese
 Morphological Analyser designed for search.

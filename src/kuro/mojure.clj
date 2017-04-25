@@ -1,9 +1,6 @@
 (ns kuro.mojure
-  (:use kuro.fude benri.kuro)
   (:require [clojure.string :as str]
-            [clojure.set :refer [rename-keys]]
-            [clojure.core.memoize :refer [memo]]
-            [clojure.edn :as edn])
+            [clojure.set :refer [rename-keys]])
   (:import (org.atilika.kuromoji Tokenizer Tokenizer$Mode)))
 
 (def ^:dynamic ^Tokenizer *tokenizer*)
@@ -16,9 +13,8 @@
   [mode & body]
   `(let [wrapper-mode# (try (->> ~mode name str/upper-case)
                            (catch ClassCastException _# "NORMAL"))
-         mode# (if (= wrapper-mode# "LEARNING") "SEARCH" wrapper-mode#)
          mode# (let [mode-str# "org.atilika.kuromoji.Tokenizer$Mode/"]
-                 (->> mode# (str mode-str#) read-string eval))]
+                 (->> wrapper-mode# (str mode-str#) read-string eval))]
     (binding [*tokenizer* (-> (Tokenizer/builder) (.mode mode#) .build)
               *mode* wrapper-mode#]
       ~mode ~@body)))
@@ -66,9 +62,9 @@
    "名詞,一般" [:noun :common]})
 
 (defn jp->en
-  "Converts word in Japanese to English. Defaults to English in case it's not
+  "Converts word in Japanese to English. Defaults to Japanese in case it's not
    mapped yet."
-  [word] (or-> word jp->en-mapping))
+  [word] (get jp->en-mapping word word))
 
 (defn moji->clj-token
   "Accepts a org.atilika.kuromoji.Token and creates a Clojure map with the
@@ -83,17 +79,19 @@
     (-> (fn [[old niw]]
           (let [replaced (str/replace-first joined (re-pattern old) niw)]
             (if-not (= joined replaced) replaced)))
-        (keep-first [["動詞-非自立" "動詞,非自立"] ["形容詞-非自立" "形容詞,非自立"]
-                     ["名詞-一般" "名詞,一般"]])
+        (keep [["動詞-非自立" "動詞,非自立"] ["形容詞-非自立" "形容詞,非自立"]
+               ["名詞-一般" "名詞,一般"]])
+        first
         (#(if % (str/split % #"-") coll)))))
 
 (defn clj->en-token
   "Accepts a clj-token and translates its features to english."
   [token]
-  (update-multi token
-    {:partOfSpeech  (comp flatten (partial map jp->en) ->exceptions)
-     :allFeaturesArray
-       #(->> (drop-last 3 %) ->exceptions (map jp->en) flatten (<- (concat (take-last 3 %))))}))
+  (-> token
+      (update :partOfSpeech (comp flatten (partial map jp->en) ->exceptions))
+      (update :allFeaturesArray #(concat
+                                  (->> (drop-last 3 %) ->exceptions (map jp->en) flatten)
+                                  (take-last 3 %)))))
 
 (defn clj->mojure-token
   "Accepts a org.atilika.kuromoji.Token and then transforms its nature
@@ -101,8 +99,8 @@
   [token]
   (let [*->nil #(if-not (= % "*") %)]
     (-> token
-        (update-multi {:partOfSpeech (comp #(map *->nil %) #(str/split % #","))
-                       :allFeaturesArray (partial map *->nil)})
+        (update :partOfSpeech (comp #(map *->nil %) #(str/split % #",")))
+        (update :allFeaturesArray (partial map *->nil))
         clj->en-token
         (rename-keys {:baseForm :base-form
                       :partOfSpeech :part-of-speech
@@ -112,109 +110,13 @@
 
 (defn raw-tokenize
   "Segments text into an ordered seq of org.atilika.kuromoji.Token tokens.
-   Must be used in the context of with-tokenizer.
-   Does not support :learning mode."
+   Must be used in the context of with-tokenizer."
   [s] (seq (.tokenize *tokenizer* s)))
-
-(defn- clj-tokenize-helper
-  [s] (->> (raw-tokenize s) (map moji->clj-token)))
-
-(defn clj-tokenize-with-spaces [text]
-  (let [txt-no-spaces (str/replace text #"[　 ]+" "")
-        tokens (clj-tokenize-helper txt-no-spaces)
-        replace-fn (fn [s token-s]
-                     (str/replace s (re-pattern (str "^" token-s)) ""))
-        some-space-next #(some #{(-> % first str)} [" " "　"])
-        next-space-fn #(some->> % some-space-next (hash-map :next-space))
-        rm-leading-space #(apply str (drop 1 %))
-        f (fn [[s coll] token]
-              (let [replaced-text (replace-fn s (:surfaceForm token))
-                    next-space (next-space-fn replaced-text)]
-                [(if next-space (rm-leading-space replaced-text) replaced-text)
-                 (conj coll (merge token next-space))]))]
-    (second (reduce f [text []] tokens))))
-
-(defn ->model
-  [text & [token-fn]]
-  (->> (clj-tokenize-with-spaces text)
-    (map #(select-keys % [:surfaceForm :partOfSpeech :next-space]))
-    (map #(merge (select-keys % [:next-space])
-                 ((or token-fn identity) %)))
-    (map #(into {} (remove (fn [[k v]] ((every-pred coll? empty?) v)) %)))
-    (#(map (fn [item1 item2] [item1 item2]) % (rest %)))
-    (map (partial apply hash-map))
-    (apply merge-with (comp flatten list))
-    (map-vals (comp frequencies flatten list))))
-
-(defonce spaces (with-tokenizer (clj-tokenize-helper " 　"))) ; OPTIMIZE make this atom
-(defonce half-space (first spaces))
-(defonce full-space (second spaces))
-
-(def model (with-tokenizer :search (->model training-data)))
-
-(defn max-key-next-tokens [next-tokens-with-frequency]
-  (try
-    (apply max-key last next-tokens-with-frequency)
-  (catch Exception e
-    (println "exception occurred")
-    (throw (Exception. "bla")))))
-
-; [pt1^{nt1^2 nt2^1} pt2^{nt1^4 nt2^1}]
-(defn ->most-frequent-adjacent-pair [tokens]
-  (apply max-key (comp last last) tokens))
-
-(defmulti add-space-info
-  (fn [{:keys [surfaceForm]} _]
-    (boolean (some #{surfaceForm} ["　" " " "\f"]))))
-
-(defmethod add-space-info true [prev-token _] prev-token)
-
-(defmethod add-space-info :default [prev-token next-token]
-  (let [prev-tok-candidates (find-token-candidates prev-token (keys model))
-        prev-tok-candidates-no-elect (mapv #(dissoc % :elect) prev-tok-candidates)]
-    (try
-      (or
-        (some->> (select-keys model prev-tok-candidates-no-elect)
-          (->narrowed-model-for-nexts next-token)
-          (map (fn [[k v]] [k (max-key-next-tokens v)])) ; gets most frequent next for its prev
-          ->most-frequent-adjacent-pair ; ([pt1 [nt1 1]] ..) → [pt1 [nt1 1]]
-          first ; [pt1 [nt1 1]] → pt1
-          ; FIXME all prev-tok-candidates are same level, so any will do
-; TO REMOVE IN SOME DAYS    (#(ffilter (fn [pt] (= (dissoc pt :elect) %))
-;                     prev-tok-candidates))
-          (<- (select-keys [:elect :next-space])
-              (merge prev-token)))
-        prev-token)
-    (catch Exception e  ; FIXME this is not correct
-      (assoc prev-token :exception e)))))
-
-(defonce add-space-info-memo (memo add-space-info))
-
-(defn add-debug-tokens [{:keys [exception elect]}]
-  (filter :surfaceForm [{:surfaceForm exception} {:surfaceForm elect}]))
-
-(defn add-space-token [debug token]
-  (concat
-    (case (:next-space token)
-      nil [token] ; faster in the beginning (most common use case)
-      " " [(dissoc token :next-space :elect :exception) half-space]
-      "　" [(dissoc token :next-space :elect :exception) full-space])
-    (if debug (add-debug-tokens token))))
-
-(defonce add-space-token-memo (memo add-space-token))
-
-(defn learning-tokenize [tokens]
-  (->> (-> tokens vec peek)
-       (conj (mapv add-space-info-memo tokens (rest tokens)))
-       (mapcat (partial add-space-token-memo *debug*))))
 
 (defn clj-tokenize
   "Segments text into an ordered seq of clj tokens.
    Must be used in the context of with-tokenizer."
-  [s] (let [tokens (clj-tokenize-helper s)]
-        (if (= *mode* "LEARNING")
-          (learning-tokenize tokens)
-          tokens)))
+  [s] (map moji->clj-token (raw-tokenize s)))
 
 (defn tokenize
   "Segments text into an ordered seq of kuromojure tokens.
